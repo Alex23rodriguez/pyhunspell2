@@ -30,19 +30,11 @@ class HunSpell:
         return ans[0][0] in ["*", "+"]
 
     def suggest(self, word: str):
-        ans = self.raw(word)[0]
+        ans = self.raw(word)[0].strip()
         if ans[0] != "&":
             return []
 
         return ans[ans.find(":") + 1 :].split(", ")
-
-    def analyze(self, word: str) -> list[list[str]]:
-        stdout, stderr = run_process_with_stdin(self.command + ["-s"], word)
-        if stderr:
-            raise OSError(stderr)
-
-        stems = [line.split()[1:] for line in stdout.strip().splitlines()]
-        return [s for s in stems if s]
 
     def stem(self, word: str) -> list[str]:
         stdout, stderr = run_process_with_stdin(self.command + ["-s"], word)
@@ -51,6 +43,14 @@ class HunSpell:
 
         lines = [line.split() for line in stdout.strip().splitlines()]
         return [line[1] for line in lines if len(line) == 2]
+
+    def analyze(self, word: str) -> list[list[str]]:
+        stdout, stderr = run_process_with_stdin(self.command + ["-m"], word)
+        if stderr:
+            raise OSError(stderr)
+
+        morph = [line.split()[1:] for line in stdout.strip().splitlines()]
+        return [s for s in morph if s]
 
     def close(self):
         self.cli.kill()
