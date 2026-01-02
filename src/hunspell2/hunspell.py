@@ -34,7 +34,7 @@ class HunSpell:
         if ans[0] != "&":
             return []
 
-        return ans[ans.find(":") + 1 :].split(", ")
+        return ans[ans.find(":") + 2 :].split(", ")
 
     def stem(self, word: str) -> list[str]:
         stdout, stderr = run_process_with_stdin(self.command + ["-s"], word)
