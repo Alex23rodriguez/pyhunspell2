@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pathlib import Path
 
 from hunspell2.cli_runner import CLIRunner
@@ -21,8 +22,9 @@ class HunSpell:
         ]
         self.cli = CLIRunner(self.command)
         self.cli.await_message()
+        self.raw = lru_cache(maxsize=8192)(self._raw_impl)
 
-    def raw(self, word: str):
+    def _raw_impl(self, word: str):
         return self.cli.await_reply(word)
 
     def spell(self, word: str):
@@ -34,7 +36,7 @@ class HunSpell:
         if ans[0] != "&":
             return []
 
-        return ans[ans.find(":") + 2 :].split(", ")
+        return ans[ans.find(":") + 2:].split(", ")
 
     def stem(self, word: str) -> list[str]:
         stdout, stderr = run_process_with_stdin(self.command + ["-s"], word)
@@ -52,5 +54,7 @@ class HunSpell:
         morph = [line.split()[1:] for line in stdout.strip().splitlines()]
         return [s for s in morph if s]
 
-    def close(self):
+    def close(self, report: bool = False):
+        if report:
+            print(self.dic_path, self.raw.cache_info())
         self.cli.kill()
