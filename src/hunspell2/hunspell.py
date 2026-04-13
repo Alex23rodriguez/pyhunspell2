@@ -7,6 +7,8 @@ from hunspell2.cli_utils import run_process_with_stdin
 class HunSpell:
     def __init__(self, dic_path: str | Path) -> None:
         if isinstance(dic_path, str):
+            if not dic_path.endswith(".dic") and "/" not in dic_path:
+                dic_path = f"/usr/share/hunspell/{dic_path}.dic"
             dic_path = Path(dic_path)
 
         assert dic_path.suffix == ".dic", "expected '.dic' file"
