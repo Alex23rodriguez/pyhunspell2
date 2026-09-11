@@ -31,11 +31,11 @@ class HunSpell:
 
     def spell(self, word: str):
         ans = self.raw(word)
-        return ans[0][0] in ["*", "+"]
+        return ans[0][0] in ["*", "+", "-", "\n"]
 
     def suggest(self, word: str):
         ans = self.raw(word)[0].strip()
-        if ans[0] != "&":
+        if ans == '' or ans[0] != "&":
             return []
 
         return ans[ans.find(":") + 2:].split(", ")
