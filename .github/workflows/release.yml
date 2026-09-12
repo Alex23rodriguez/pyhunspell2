@@ -20,11 +20,17 @@ jobs:
       - name: Build package
         run: uv build
 
+      - name: Extract release notes from CHANGELOG
+        run: |
+          awk 'BEGIN{count=0} /^## \[/{count++} count==1{print} count==2{exit}' CHANGELOG.md \
+            | sed "s/ - Unreleased/ - $(date -u +%Y-%m-%d)/" > release_notes.md
+          cat release_notes.md
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${GITHUB_REF_NAME}" \
             --title "${GITHUB_REF_NAME}" \
-            --generate-notes \
+            --notes-file release_notes.md \
             dist/*
